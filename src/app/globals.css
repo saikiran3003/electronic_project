@@ -28,3 +28,20 @@ a {
   text-decoration: none;
   color: inherit;
 }
+html {
+  color-scheme: light !important;
+  background: #ffffff !important;
+}
+
+body {
+  background: #ffffff !important;
+  color: #000000 !important;
+}
+
+/* Stop mobile dark mode auto inversion */
+@media (prefers-color-scheme: dark) {
+  html, body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+}
