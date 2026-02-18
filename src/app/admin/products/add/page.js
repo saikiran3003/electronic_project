@@ -217,7 +217,7 @@ export default function AdminProductForm({ onSuccess }) {
       }
     } catch (err) {
       console.error(err);
-      alert("Something went wrongs ❌");
+      alert("Something went wrongss ❌");
     }
   };
 
