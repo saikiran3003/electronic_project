@@ -1,4 +1,6 @@
 @import "tailwindcss";
+@import "./responsive.css";
+
 
 :root {
   --background: #ffffff;
@@ -24,10 +26,12 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
 a {
   text-decoration: none;
   color: inherit;
 }
+
 html {
   color-scheme: light !important;
   background: #ffffff !important;
@@ -40,7 +44,9 @@ body {
 
 /* Stop mobile dark mode auto inversion */
 @media (prefers-color-scheme: dark) {
-  html, body {
+
+  html,
+  body {
     background: #ffffff !important;
     color: #000000 !important;
   }
