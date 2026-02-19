@@ -281,11 +281,118 @@ export default function ProductsPage() {
     return () => (isMounted = false);
   }, []);
 
+  useEffect(() => {
+    const trigger = localStorage.getItem("triggerPayment");
+    if (trigger === "true" && status === "ready") {
+      const storedProduct = localStorage.getItem("selectedProduct");
+      const token = localStorage.getItem("token");
+      if (storedProduct && token) {
+        localStorage.removeItem("triggerPayment");
+        handleRazorpay(JSON.parse(storedProduct));
+      }
+    }
+  }, [status]);
+
+  const handleRazorpay = async (prod) => {
+    try {
+      const userName = localStorage.getItem("userName");
+      const userEmail = localStorage.getItem("userEmail");
+
+      // 1. Create order on server
+      const orderRes = await fetch("/api/razorpay", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          amount: prod.price,
+          currency: "INR",
+        }),
+      });
+
+      const orderData = await orderRes.json();
+      if (!orderData.success) throw new Error(orderData.error || "Order creation failed");
+
+      // 2. Open Razorpay Modal
+      const options = {
+        key: "rzp_test_kY71FTFw40NENF",
+        amount: orderData.order.amount,
+        currency: orderData.order.currency,
+        name: "Electronics Store",
+        description: prod.name,
+        order_id: orderData.order.id,
+        handler: async function (response) {
+          try {
+            const token = localStorage.getItem("token");
+
+            // Save all details to DB
+            const saveResponse = await fetch("/api/payment", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                productName: prod.name,
+                productId: prod._id,
+                price: prod.price,
+                amount: prod.price,
+                paymentMethod: "Razorpay Checkout",
+                userToken: token,
+                email: userEmail,
+                fullName: userName,
+                status: "Success",
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_signature: response.razorpay_signature,
+              }),
+            });
+
+            const saveData = await saveResponse.json();
+            if (saveData.success) {
+              window.Swal.fire({
+                title: "Payment Successful",
+                icon: "success",
+                timer: 2000,
+                showConfirmButton: false,
+              });
+              localStorage.removeItem("selectedProduct");
+            } else {
+              alert("Error saving record: " + saveData.error);
+            }
+          } catch (err) {
+            console.error("Save Error:", err);
+          }
+        },
+        prefill: { name: userName, email: userEmail },
+        theme: { color: "#2563eb" },
+      };
+
+      if (!window.Razorpay) {
+        alert("Razorpay is still loading. Please try again in a moment.");
+        return;
+      }
+
+      const rzp = new window.Razorpay(options);
+      rzp.on('payment.failed', function (res) {
+        window.Swal.fire({
+          title: "Payment Failed",
+          text: res.error.description,
+          icon: "error",
+        });
+      });
+      rzp.open();
+
+    } catch (error) {
+      console.error("Payment Init Error:", error);
+      alert("Payment Initialization Failed ❌");
+    }
+  };
+
   const handleBuyNow = (product) => {
     localStorage.setItem("selectedProduct", JSON.stringify(product));
     const token = localStorage.getItem("token");
-    if (token) router.push("/checkout");
-    else router.push("/user/login");
+    if (token) {
+      handleRazorpay(product);
+    } else {
+      localStorage.setItem("triggerPayment", "true");
+      router.push("/user/login");
+    }
   };
 
   // ✅ Image click: redirect to details page
@@ -310,7 +417,7 @@ export default function ProductsPage() {
       {/* HEADER */}
       <div style={{ marginBottom: "40px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "15px" }}>
         <div>
-          <h1 style={{ fontSize: "28px", fontWeight: "700",color: "#070606ff" }}>Our Products</h1>
+          <h1 style={{ fontSize: "28px", fontWeight: "700", color: "#070606ff" }}>Our Products</h1>
           {userName && <p style={{ color: "#007bff" }}>Welcome, {userName}</p>}
         </div>
 
@@ -353,7 +460,7 @@ export default function ProductsPage() {
                     : fallbackImage;
 
                 return (
-                  <div key={product._id} style={{ width: "300px", color: "#070606ff",background: "#fff", padding: "20px", borderRadius: "14px", boxShadow: "0 6px 16px rgba(0,0,0,0.08)", transition: "0.3s" }}>
+                  <div key={product._id} style={{ width: "300px", color: "#070606ff", background: "#fff", padding: "20px", borderRadius: "14px", boxShadow: "0 6px 16px rgba(0,0,0,0.08)", transition: "0.3s" }}>
                     {/* IMAGE */}
                     <div style={{ overflow: "hidden", borderRadius: "12px" }}>
                       <img
@@ -366,7 +473,7 @@ export default function ProductsPage() {
                       />
                     </div>
 
-                    <h2 style={{ marginTop: "16px",color: "#070606ff"}}>{product.name}</h2>
+                    <h2 style={{ marginTop: "16px", color: "#070606ff" }}>{product.name}</h2>
                     <p style={{ fontSize: "14px", color: "#070606ff" }}>{product.description}</p>
 
                     <div style={{ marginTop: "18px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>

@@ -18,6 +18,10 @@ export async function POST(req) {
             userToken: body.userToken,
             status: body.status || "Success",
             upiPin: body.upiPin,
+            razorpay_payment_id: body.razorpay_payment_id,
+            razorpay_order_id: body.razorpay_order_id,
+            razorpay_signature: body.razorpay_signature,
+            amount: body.amount,
         });
 
         return Response.json({

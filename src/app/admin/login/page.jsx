@@ -21,7 +21,12 @@ export default function LoginPage() {
 
       const data = await res.json();
       if (res.ok) {
-        alert("Login Successful");
+        window.Swal.fire({
+          title: "Admin Login Successfully",
+          icon: "success",
+          timer: 2000,
+          showConfirmButton: false,
+        });
         router.push("/admin/dashboard");
       } else {
         alert(data.message || "Login failed");

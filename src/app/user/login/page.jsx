@@ -48,7 +48,12 @@ export default function AuthPage() {
         localStorage.setItem("token", data.token);
         localStorage.setItem("userName", data.name);
         localStorage.setItem("userEmail", data.email);
-        alert("Login Successful");
+        window.Swal.fire({
+          title: "Login Successfully",
+          icon: "success",
+          timer: 2000,
+          showConfirmButton: false,
+        });
         router.push("/products"); // 🔥 Redirect
       } else {
         alert("Signup Successful. Please Login.");

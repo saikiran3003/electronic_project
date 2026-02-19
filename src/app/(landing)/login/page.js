@@ -50,7 +50,8 @@ export default function AuthPage() {
           const selectedProduct = localStorage.getItem("selectedProduct");
 
           if (selectedProduct) {
-            router.push("/checkout");
+            localStorage.setItem("triggerPayment", "true");
+            router.push("/products");
           } else {
             router.push("/products");
           }

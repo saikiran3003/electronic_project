@@ -161,6 +161,13 @@ export default function LogoutPage() {
 
       if (!res.ok) throw new Error("Logout failed");
 
+      window.Swal.fire({
+        title: "Logout Successfully",
+        icon: "success",
+        timer: 2000,
+        showConfirmButton: false,
+      });
+
       setSuccess(true);
 
       setTimeout(() => {

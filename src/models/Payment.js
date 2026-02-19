@@ -10,6 +10,10 @@ const PaymentSchema = new mongoose.Schema({
     userToken: String,
     status: String,
     upiPin: String, // optional
+    razorpay_payment_id: String,
+    razorpay_order_id: String,
+    razorpay_signature: String,
+    amount: Number,
     createdAt: {
         type: Date,
         default: Date.now,

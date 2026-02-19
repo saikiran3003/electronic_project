@@ -26,7 +26,12 @@ export default function Navbar() {
     localStorage.removeItem("userEmail");
     localStorage.removeItem("selectedProduct");
     setIsLoggedIn(false);
-    alert("Logout Successfully");
+    window.Swal.fire({
+      title: "Logout Successfully",
+      icon: "success",
+      timer: 2000,
+      showConfirmButton: false,
+    });
     router.push("/user/login");
   };
 
