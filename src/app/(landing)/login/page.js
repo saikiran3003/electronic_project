@@ -48,10 +48,13 @@ export default function AuthPage() {
           localStorage.setItem("userEmail", data.email);
 
           const selectedProduct = localStorage.getItem("selectedProduct");
+          const triggerCartPayment = localStorage.getItem("triggerCartPayment");
 
-          if (selectedProduct) {
+          if (selectedProduct && !triggerCartPayment) {
             localStorage.setItem("triggerPayment", "true");
             router.push("/products");
+          } else if (triggerCartPayment) {
+            router.push("/cart");
           } else {
             router.push("/products");
           }

@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
@@ -7,6 +7,16 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+
+  useEffect(() => {
+    // Destroy session on login page access (Requirement 1 & 2)
+    localStorage.removeItem("adminToken");
+
+    // Destroy session on window close (Requirement 3)
+    const handleClose = () => localStorage.removeItem("adminToken");
+    window.addEventListener("beforeunload", handleClose);
+    return () => window.removeEventListener("beforeunload", handleClose);
+  }, []);
 
   const handleLogin = async (e) => {
     if (e) e.preventDefault();
@@ -21,6 +31,7 @@ export default function LoginPage() {
 
       const data = await res.json();
       if (res.ok) {
+        localStorage.setItem("adminToken", data.token || "admin_logged_in");
         window.Swal.fire({
           title: "Admin Login Successfully",
           icon: "success",

@@ -3,6 +3,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { ShoppingCart, Zap } from "lucide-react";
 
 export default function Navbar() {
   const router = useRouter();
@@ -15,10 +16,21 @@ export default function Navbar() {
     };
 
     checkLogin();
-    const interval = setInterval(checkLogin, 1000); // Polling for any page
+    const interval = setInterval(() => {
+      checkLogin();
+      const cartData = localStorage.getItem("cart");
+      if (cartData) {
+        const parsed = JSON.parse(cartData);
+        setCartCount(parsed.reduce((acc, item) => acc + item.quantity, 0));
+      } else {
+        setCartCount(0);
+      }
+    }, 1000);
 
     return () => clearInterval(interval);
   }, []);
+
+  const [cartCount, setCartCount] = useState(0);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -39,12 +51,13 @@ export default function Navbar() {
     <nav className="bg-red-500 border-b border-gray-700 text-white sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
 
-        <button
+        <div
           onClick={() => router.push("/home")}
-          className="text-lg font-semibold hover:opacity-80"
+          className="flex items-center gap-2 cursor-pointer hover:opacity-80"
         >
-          Electronic Gadgets
-        </button>
+          <Zap className="text-yellow-400 fill-yellow-400" size={28} />
+          <span className="text-xl font-bold tracking-tight">Electronic Gadgets</span>
+        </div>
 
         <div className="flex gap-10 text-sm tracking-widest uppercase">
 
@@ -52,6 +65,14 @@ export default function Navbar() {
           <button onClick={() => router.push("/about")}>About</button>
           <button onClick={() => router.push("/products")}>Products</button>
           <button onClick={() => router.push("/contact")}>Contact</button>
+
+          <button
+            onClick={() => router.push("/cart")}
+            className="flex items-center gap-1 text-yellow-400 font-bold"
+          >
+            <ShoppingCart size={18} />
+            Cart {isLoggedIn ? `(${cartCount})` : ""}
+          </button>
 
           {isLoggedIn ? (
             <button

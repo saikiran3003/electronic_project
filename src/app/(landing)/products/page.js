@@ -262,8 +262,14 @@ export default function ProductsPage() {
   const fallbackImage = "/assets/images/tvimage.jpg";
 
   useEffect(() => {
-    const storedName = localStorage.getItem("userName");
-    if (storedName) setUserName(storedName);
+    const updateUser = () => {
+      const storedName = localStorage.getItem("userName");
+      if (storedName) setUserName(storedName);
+      else setUserName("");
+    };
+
+    updateUser();
+    const nameInterval = setInterval(updateUser, 1000);
 
     let isMounted = true;
     const loadProducts = async () => {
@@ -278,7 +284,10 @@ export default function ProductsPage() {
       }
     };
     loadProducts();
-    return () => (isMounted = false);
+    return () => {
+      isMounted = false;
+      clearInterval(nameInterval);
+    };
   }, []);
 
   useEffect(() => {
@@ -316,7 +325,7 @@ export default function ProductsPage() {
         key: "rzp_test_kY71FTFw40NENF",
         amount: orderData.order.amount,
         currency: orderData.order.currency,
-        name: "Electronics Store",
+        name: "Electronic Gadgets",
         description: prod.name,
         order_id: orderData.order.id,
         handler: async function (response) {
@@ -382,6 +391,30 @@ export default function ProductsPage() {
       console.error("Payment Init Error:", error);
       alert("Payment Initialization Failed ❌");
     }
+  };
+
+  const addToCart = (product) => {
+    let cart = JSON.parse(localStorage.getItem("cart") || "[]");
+    const existingIndex = cart.findIndex((item) => item._id === product._id);
+
+    if (existingIndex > -1) {
+      cart[existingIndex].quantity += 1;
+    } else {
+      cart.push({ ...product, quantity: 1 });
+    }
+
+    localStorage.setItem("cart", JSON.stringify(cart));
+
+    // Playful feedback
+    window.Swal.fire({
+      title: "Added to Cart!",
+      text: `${product.name} is now in your cart.`,
+      icon: "success",
+      timer: 1500,
+      showConfirmButton: false,
+      toast: true,
+      position: 'top-end'
+    });
   };
 
   const handleBuyNow = (product) => {
@@ -479,14 +512,44 @@ export default function ProductsPage() {
                     <div style={{ marginTop: "18px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                       <span style={{ fontWeight: "700", color: "#070606ff" }}>₹{product.price}</span>
 
-                      <button
-                        onClick={() => handleBuyNow(product)}
-                        style={{ backgroundColor: "#007bff", color: "#fff", border: "none", padding: "8px 16px", borderRadius: "8px", cursor: "pointer", transition: "0.3s" }}
-                        onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#0056b3")}
-                        onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#007bff")}
-                      >
-                        Buy Now
-                      </button>
+                      <div style={{ display: "flex", gap: "10px" }}>
+                        <button
+                          onClick={() => addToCart(product)}
+                          style={{
+                            backgroundColor: "#28a745",
+                            color: "#fff",
+                            border: "none",
+                            padding: "8px 12px",
+                            borderRadius: "8px",
+                            cursor: "pointer",
+                            fontSize: "13px",
+                            fontWeight: "600",
+                            transition: "0.2s"
+                          }}
+                          onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#218838")}
+                          onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#28a745")}
+                        >
+                          Add to Cart
+                        </button>
+                        <button
+                          onClick={() => handleBuyNow(product)}
+                          style={{
+                            backgroundColor: "#007bff",
+                            color: "#fff",
+                            border: "none",
+                            padding: "8px 12px",
+                            borderRadius: "8px",
+                            cursor: "pointer",
+                            fontSize: "13px",
+                            fontWeight: "600",
+                            transition: "0.2s"
+                          }}
+                          onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#0056b3")}
+                          onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#007bff")}
+                        >
+                          Buy Now
+                        </button>
+                      </div>
                     </div>
                   </div>
                 );
